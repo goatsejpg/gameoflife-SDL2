@@ -129,6 +129,7 @@ int main (int argc, char* argv[]) {
 					for (auto B : buttons) {
 						B->pressed(false);
 					}
+					drawFrame = true;
 					break;
 				}
 				break;
