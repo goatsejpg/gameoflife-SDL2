@@ -37,7 +37,11 @@ public:
 	virtual void action() = 0;
 	virtual void render(SDL_Renderer* r) = 0;
 
-	~Button() = default;
+	virtual ~Button() {
+		std::cerr << "Destroying button at " << this << std::endl;
+		SDL_DestroyTexture(_pressedTexture);
+		SDL_DestroyTexture(_Texture);
+	}
 protected:
 	bool _pressed = false;
 	Vec2INT _POS;
@@ -60,6 +64,7 @@ public:
 			renderTexture(r, _Texture, Vec2INTtoVec2(_POS), Vec2INTtoVec2(_DIMENSION));
 		}
 	}
+	virtual ~Pause() = default;
 private:
 	bool* pauseValue;
 };
@@ -86,6 +91,8 @@ public:
 			renderTexture(r, _Texture, Vec2INTtoVec2(_POS), Vec2INTtoVec2(_DIMENSION));
 		} 
 	}
+	
+	virtual ~SpeedButton() = default;
 private:
 	char difference;
 	signed char* speedValue;
@@ -110,7 +117,7 @@ public:
 			renderTexture(r, _Texture, Vec2INTtoVec2(_POS), Vec2INTtoVec2(_DIMENSION));
 		} 
 	}
-private:
+	virtual ~ResetButton() = default;
 };
 
 class Display {
@@ -131,6 +138,10 @@ public:
 		renderText(r, nameFont, displayName.c_str(), Vec2(_POS.x+15, _POS.y+3),BLACK);
 	}
 
+	virtual ~Display () {
+		std::cerr << "Destroying display at " << this << std::endl;
+		SDL_DestroyTexture(texture);
+	}
 private:
 	Vec2 _POS;
 	Vec2 _DIMENSION = Vec2(142,80);

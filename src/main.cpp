@@ -23,6 +23,8 @@ int main (int argc, char* argv[]) {
 	SDL_Renderer* renderer = SDL_CreateRenderer(window,-1,
 	                         SDL_RENDERER_ACCELERATED);
 	SDL_Event        event;
+	SDL_Surface*      icon = SDL_LoadBMP("../resources/bmp/icon.bmp");
+	SDL_SetWindowIcon(window, icon);	
 
 	if (TTF_Init() == -1) {
 		std::cerr << "SDL: TTF couldn't be initalized." << std::endl;
@@ -46,39 +48,39 @@ int main (int argc, char* argv[]) {
 	struct timespec start, end;
 	unsigned int deltaTime; // micro seconds
 
-	Display display(Vec2(105,510), renderer, &SPEED, "DELAY", OpenSans, Clock);
+	Display* display = new Display(Vec2(105,510), renderer, &SPEED, "DELAY", OpenSans, Clock);
 
 	Button* buttons[4];
 
-	SpeedButton minusSpeed(Vec2INT(10,510), 
+	SpeedButton* minusSpeed = new SpeedButton(Vec2INT(10,510), 
 	loadTexture(renderer,"../resources/bmp/minusbuttonpressed.bmp"),
 	loadTexture(renderer,"../resources/bmp/minusbutton.bmp"),
 	-1, &SPEED, Vec2INT(80,80)
 	);
 
-	SpeedButton plusSpeed(Vec2INT(262,510), 
+	SpeedButton* plusSpeed = new SpeedButton(Vec2INT(262,510), 
 	loadTexture(renderer,"../resources/bmp/plusbuttonpressed.bmp"),
 	loadTexture(renderer,"../resources/bmp/plusbutton.bmp"),
 	1, &SPEED, Vec2INT(80,80)
 	);
 
-	Pause pauseButton(Vec2INT(705,510),
+	Pause* pauseButton = new Pause(Vec2INT(705,510),
 	loadTexture(renderer,"../resources/bmp/pausebuttonpressed.bmp"),
 	loadTexture(renderer,"../resources/bmp/pausebutton.bmp"),
 	&PAUSED, Vec2INT(80,80)
 	);
 
-	ResetButton reset(Vec2INT(380, 510),
+	ResetButton* reset = new ResetButton(Vec2INT(380, 510),
 	loadTexture(renderer,"../resources/bmp/resetbuttonpressed.bmp"),
 	loadTexture(renderer,"../resources/bmp/resetbutton.bmp"),
 	Vec2INT(120,80));
 
-	buttons[0] = &minusSpeed; buttons[1] = &plusSpeed;
-	buttons[2] = &pauseButton; buttons[3] = &reset;
+	buttons[0] = minusSpeed; buttons[1] = plusSpeed;
+	buttons[2] = pauseButton; buttons[3] = reset;
 
 	gameoflife::renderMatrix(renderer);
 
-	display.render(renderer);
+	display->render(renderer);
 	for (auto B : buttons) {
 		B->render(renderer);
 	}	
@@ -166,7 +168,7 @@ int main (int argc, char* argv[]) {
 		if (drawFrame) {
 			gameoflife::renderMatrix(renderer);
 
-			display.render(renderer);
+			display->render(renderer);
 			for (auto B : buttons) {
 				B->render(renderer);
 			}
@@ -178,9 +180,18 @@ int main (int argc, char* argv[]) {
 		clock_gettime(CLOCK_MONOTONIC, &end);
 		deltaTime = (end.tv_nsec - start.tv_nsec)/1000;
 		if (deltaTime < FPSsleep) {
-			usleep (FPSsleep - deltaTime);
+			SDL_Delay((FPSsleep - deltaTime)/1000);
 		}
 	}
 
+	SDL_FreeSurface(icon);
+	SDL_DestroyWindow(window);
+	SDL_DestroyRenderer(renderer);
+	for (auto B : buttons) {
+		delete B;
+	}
+	delete display;
+
+	SDL_Quit();
 	return 0;
 }
